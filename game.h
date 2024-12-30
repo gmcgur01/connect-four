@@ -9,8 +9,9 @@ class Game {
     public:
         Game(bool player_one_turn=true);
 
-        void display_game();
+        void display_game(bool turn=true);
         bool make_move(int move);
+        int check_win();
 
     private:
         Slot board[NUM_ROWS][NUM_COLS];
