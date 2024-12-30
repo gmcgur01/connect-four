@@ -3,6 +3,13 @@
 
 using namespace std;
 
+const int slot_bits = 2;
+
+int calc_shift(int row, int col)
+{
+    return ((row * NUM_COLS) + col) * slot_bits;
+}
+
 Game::Game(bool player_one_turn) 
 {
     for (int row = 0; row < NUM_ROWS; row++) {
@@ -12,6 +19,19 @@ Game::Game(bool player_one_turn)
     }
 
     this->player_one_turn = player_one_turn;
+}
+
+Game::Game(GameKey key)
+{
+    for (int row = 0; row < NUM_ROWS; row++) {
+        for (int col = 0; col < NUM_COLS; col++) {
+            int shift = calc_shift(row, col);
+            board[row][col] = static_cast<Slot>((key >> shift) & 0x3);
+        }
+    }
+
+    GameKey mask = 1;
+    player_one_turn = key & (mask << (NUM_COLS * NUM_ROWS * slot_bits));
 }
 
 void Game::display_game(bool turn)
@@ -115,19 +135,6 @@ int Game::check_win()
         } 
     }
 
-    for (int offset = -3; offset < 3; offset++) {
-        int row_idx = offset < 0 ? 0 : offset;
-        int col_idx = offset < 0 ? -offset : 0;
-        Slot prev = board[row_idx++][col_idx++];
-        int count = 1;
-        while (row_idx < NUM_ROWS && col_idx < NUM_COLS) {
-            int ret;
-            if ((ret = check_slot(board[row_idx++][col_idx++], prev, count))) {
-                return ret;
-            }
-        } 
-    }
-
     for (int offset = 3; offset < 9; offset++) {
         int row_idx = offset >= NUM_ROWS ? NUM_ROWS - 1 : offset;
         int col_idx = offset >= NUM_ROWS ? offset - NUM_ROWS + 1 : 0;
@@ -143,3 +150,23 @@ int Game::check_win()
 
     return 0;
 }
+
+GameKey Game::to_key() 
+{
+    GameKey key = 0;
+
+    for (int row = 0; row < NUM_ROWS; row++) {
+        for (int col = 0; col < NUM_COLS; col++) {
+            int shift = calc_shift(row, col);
+            key |= (static_cast<GameKey>(board[row][col]) << shift);
+        }
+    }
+
+    if (player_one_turn) {
+        GameKey mask = 1;
+        key |= (mask << (NUM_COLS * NUM_ROWS * slot_bits));
+    }
+
+    return key;
+}
+

@@ -3,10 +3,10 @@
 
 using namespace std;
 
-int main() 
+
+int play_game() 
 {
     Game connect4 = Game();
-
     while (true) {
         int move;
         do {
@@ -22,6 +22,10 @@ int main()
             cout << "Enter a number between 1 and 7: ";
             cin >> move;
         } while (!connect4.make_move(move - 1));
-    
     }
+} 
+
+int main() 
+{
+    return play_game();
 }
